@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+export PROJECT_NAME=${PROJECT_NAME:="springboard"}
+
+runCommands() {
+  if [[ "${CI}" != "true" ]]; then
+    SCRIPTS_DIR="$(dirname "$0")"/../shared/scripts
+    source "${SCRIPTS_DIR}/checkDevRequirements.sh"
+  fi
+
+  if [[ "${1}" == "install" ]]; then
+    install
+  elif [[ "${1}" == "start" ]]; then
+    start
+  elif [[ "${1}" == "test" ]]; then
+    test "${@}"
+  elif [[ "${1}" == "dependencies" ]]; then
+    dependencies
+  elif [[ "${1}" == "docker" ]]; then
+    docker build . -t ${PROJECT_NAME}
+    docker run -ti ${PROJECT_NAME}
+  else
+    echo "Please provide one of the following commands: install, start, test, dependencies, docker"
+    exit 1
+  fi
+}
+
+install() {
+  if [[ "${CI}" != "true" ]]; then
+    nvm install
+  fi
+  yarn install
+}
+
+start() {
+  install
+  yarn --silent nodemon -q
+}
+
+test() {
+  install
+  yarn tsc --noEmit
+  yarn jest "${@}"
+}
+
+dependencies() {
+  docker-compose up
+}
+
+runCommands "${@}"

@@ -1,0 +1,7 @@
+# Ignore all files
+*
+# Don't ignore:
+!src/*
+!package.json
+!tsconfig.json
+!yarn.lock

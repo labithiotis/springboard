@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+export PROJECT_NAME=${PROJECT_NAME:="springboard"}
+
+runCommands() {
+  if [[ "${CI}" != "true" ]]; then
+    SCRIPTS_DIR="$(dirname "$0")"/../shared/scripts
+    source "${SCRIPTS_DIR}/checkDevRequirements.sh"
+  fi
+
+  if [[ "${1}" == "install" ]]; then
+    install
+  elif [[ "${1}" == "start" ]]; then
+    start
+  elif [[ "${1}" == "test" ]]; then
+    test "${@}"
+  elif [[ "${1}" == "build" ]]; then
+    build
+  elif [[ "${1}" == "e2e:open" ]]; then
+    yarn cypress open
+  elif [[ "${1}" == "e2e:run" ]]; then
+    yarn cypress run
+  else
+    echo "Please provide one of the following commands: install, start, test, build"
+    exit 1
+  fi
+}
+
+install() {
+  if [[ "${CI}" != "true" ]]; then
+    nvm install
+  fi
+  yarn install
+}
+
+start() {
+  install
+  yarn parcel ./src/index.html --port 3000
+}
+
+test() {
+  install
+  yarn tsc --noEmit
+  yarn jest "${@}"
+}
+
+build() {
+  install
+  yarn parcel build src/index.html -d dist
+}
+
+runCommands "${@}"

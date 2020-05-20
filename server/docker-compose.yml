@@ -1,0 +1,13 @@
+version: '3'
+services:
+  springboard:
+    image: mongo:4.0
+    command: ['--storageEngine', 'wiredTiger']
+    logging:
+      driver: none
+    expose:
+      - 27070
+    ports:
+      - 27070:27017
+    volumes:
+      - ~/docker-data/mongodb_4.0/springboard_mongo:/data/db

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.cache
+.idea/
+*.log
+.env*
+!.env.*.enc
+*.mp4

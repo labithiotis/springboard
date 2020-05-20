@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+runCommands() {
+  if [[ "${CI}" != "true" ]]; then
+    SCRIPTS_DIR="$(dirname "$0")"/shared/scripts
+    source "${SCRIPTS_DIR}/checkDevRequirements.sh"
+  fi
+
+  if [[ "${1}" == "install" ]]; then
+    install
+  elif [[ "${1}" == "start" ]]; then
+    start
+  elif [[ "${1}" == "test" ]]; then
+    test "${@}"
+  elif [[ "${1}" == "prettify" ]]; then
+    yarn prettier --write '**/*.{js,jsx,ts,tsx,json,html,css}'
+  else
+    echo "Please provide one of the following commands: intall, start, test, prettify"
+    exit 1
+  fi
+}
+
+install() {
+  if [[ "${CI}" != "true" ]]; then
+    nvm install
+  fi
+  yarn --silent install
+}
+
+start() {
+  (cd app && ./run start) &
+  APP=$!
+  (cd server && ./run dependencies) &
+  DEPENDENCIES=$!
+  (cd server && ./run start) &
+  SERVER=$!
+  wait ${APP} ${DEPENDENCIES} ${SERVER}
+}
+
+test() {
+  (cd app && ./run test "${@}")
+  (cd server && ./run test "${@}")
+}
+
+runCommands "${@}"

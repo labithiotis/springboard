@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "springboard",
+  "scripts": {
+    "start": "./run start",
+    "test": "./run test"
+  },
+  "workspaces": {
+    "packages": [
+      "app",
+      "server",
+      "shared"
+    ]
+  }
+}
